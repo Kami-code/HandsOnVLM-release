@@ -229,6 +229,21 @@ class EpicHOIDataset(EpicDataset):
             if verb != sampled_action_verb and verb_class != sampled_action_verb_class and noun != sampled_action_noun and noun_class != sampled_action_noun_class:
                 return sampled_action
 
+
+    def load_image_paths(self, action: EpicAction):
+        frame_aligned_observation_times, observation_frame_idxs = self.sampler(action)
+        assert observation_frames_num <= len(observation_frame_idxs), \
+            "num of observation exceed the limit of {}, set smaller t_observe, current is {}".format(len(observation_frame_idxs), observation_seconds)
+        frames_names = [frame_template.format(i) for i in observation_frame_idxs]
+        start_frame_idx = len(observation_frame_idxs) - observation_frames_num
+        frames_names = frames_names[start_frame_idx:]
+        image_paths = []
+        for f_name in frames_names:
+            # full_name: e.g. 'P24/rgb_frames/P24_05/frame_0000075700.jpg'
+            full_name = os.path.join(action.participant_id, "rgb_frames", action.video_id, f_name)
+            image_paths.append(full_name)
+        return image_paths
+
     def load_hoi_features(self, action: EpicAction):
         frame_aligned_observation_times, observation_frame_idxs = self.sampler(action)
         assert observation_frames_num <= len(observation_frame_idxs), \
@@ -239,7 +254,6 @@ class EpicHOIDataset(EpicDataset):
 
         full_names = []
         image_abs_paths = []
-        image_paths = []
         global_feats, global_masks = [], []
         rhand_feats, rhand_masks, rhand_bboxs = [], [], []
         lhand_feats, lhand_masks, lhand_bboxs = [], [], []
@@ -251,7 +265,6 @@ class EpicHOIDataset(EpicDataset):
             full_name = os.path.join(action.participant_id, "rgb_frames", action.video_id, f_name)
             image_abs_path = os.path.join(EPIC_KITCHEN_DATASET_DIR, full_name)
             image_abs_paths.append(image_abs_path)
-            image_paths.append(full_name)
             full_names.append(full_name)
             # f_dict: 'GLOBAL_FEAT',
             # 'HAND_RIGHT_FEAT', 'HAND_RIGHT_BBOX', 'OBJECT_RIGHT_FEAT', 'OBJECT_RIGHT_BBOX',
@@ -366,11 +379,10 @@ class EpicHOIDataset(EpicDataset):
         assert valid_masks.shape == (5, observation_frames_num), valid_masks.shape
         assert len(frame_aligned_observation_times) == observation_frames_num, len(frame_aligned_observation_times)
         assert len(observation_frame_idxs) == observation_frames_num, len(observation_frame_idxs)
-        assert len(image_abs_paths) == observation_frames_num, len(image_abs_paths)
 
         hoi_feature_dict = {"name": full_names, "feat": feats, "bbox_feat": bbox_feats, "valid_mask": valid_masks, 'times': frame_aligned_observation_times,
                             'start_time': action.start_time, 'frames_idxs': observation_frame_idxs,
-                            "image_abs_paths": image_abs_paths, 'image_paths': image_paths}
+                            "image_abs_paths": image_abs_paths}
 
         return hoi_feature_dict
 
