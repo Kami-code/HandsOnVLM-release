@@ -56,7 +56,6 @@ def evaluate_traj(cur_split_dict):
     valids_traj = np.concatenate(valids_traj)
 
     ade, fde, wde = evaluate_traj_stochastic(preds_traj, gts_traj, valids_traj)
-    print(f"ade = {ade} fde = {fde} wde = {wde}")
 
 
 class HandsOnVLMInference:
