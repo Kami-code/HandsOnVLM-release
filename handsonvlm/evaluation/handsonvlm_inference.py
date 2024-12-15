@@ -79,8 +79,7 @@ class HandsOnVLMInference:
         return pred_hands, True
 
 
-    def evaluate_epic_kitchen_traj(self, test_version, split, num_per_eval=None, use_reason=True):
-
+    def evaluate_epic_kitchen_traj(self, test_version, split, use_reason=True):
         if use_reason:
             epic_hoi_dataset: EpicHOIDataset = get_epic_hoi_dataset_by_name(test_version, split,
                                                                             image_processor=self.image_processor,
@@ -97,9 +96,7 @@ class HandsOnVLMInference:
             dataset = EpicConversationDataset(tokenizer=self.tokenizer, epic_hoi_dataset=epic_hoi_dataset, deterministic=True)
         val_info = {}
         for batch_idx in range(len(dataset)):
-            print(f"{batch_idx} / {num_per_eval}")
-            if num_per_eval is not None and batch_idx >= num_per_eval:
-                break
+            print(f"{batch_idx} / {len(dataset)}")
 
             sample = dataset[batch_idx]
             sample['image'] = sample['image'].unsqueeze(0).half().cuda()

@@ -1,5 +1,6 @@
 import warnings
 from typing import List, Optional, Tuple, Union
+from dataclasses import dataclass
 
 import wandb
 import deepspeed
@@ -7,14 +8,27 @@ import torch.distributed as dist
 from torch.nn import CrossEntropyLoss
 from transformers import LlamaConfig, LogitsProcessorList, StoppingCriteriaList
 from transformers.generation import validate_stopping_criteria
-from transformers.generation.utils import SampleOutput, SampleDecoderOnlyOutput, SampleEncoderDecoderOutput
+from transformers.generation.utils import SampleOutput, SampleEncoderDecoderOutput
 from transformers.modeling_outputs import CausalLMOutputWithPast
-
+from transformers.utils import ModelOutput
 
 from handsonvlm.constants import IGNORE_INDEX, IMAGE_TOKEN_INDEX
 from handsonvlm.model.language_model.lita_llama_hoi import LitaLlamaForCausalLM_hoi
 from handsonvlm.model.language_model.traj_decoder import *
 from hoi_forecast.model.visual_to_tokens import VisualToTokenHelper
+
+
+@dataclass
+class SampleDecoderOnlyOutput(ModelOutput):
+    """
+    Base class for outputs of decoder-only generation models using sampling.
+
+    Args:        sequences (`torch.LongTensor` of shape `(batch_size*num_return_sequences, sequence_length)`):            The generated sequences. The second dimension (sequence_length) is either equal to `max_length` or shorter            if all batches finished early due to the `eos_token_id`.        scores (`tuple(torch.FloatTensor)` *optional*, returned when `output_scores=True` is passed or when `config.output_scores=True`):            Processed prediction scores of the language modeling head (scores for each vocabulary token before SoftMax)            at each generation step. Tuple of `torch.FloatTensor` with up to `max_new_tokens` elements (one element for            each generated token), with each tensor of shape `(batch_size*num_return_sequences, config.vocab_size)`.        attentions (`tuple(tuple(torch.FloatTensor))`, *optional*, returned when `output_attentions=True` is passed or `config.output_attentions=True`):            Tuple (one element for each generated token) of tuples (one element for each layer of the decoder) of            `torch.FloatTensor` of shape `(num_return_sequences*batch_size, num_heads, generated_length,            sequence_length)`.        hidden_states (`tuple(tuple(torch.FloatTensor))`, *optional*, returned when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`):            Tuple (one element for each generated token) of tuples (one element for each layer of the decoder) of            `torch.FloatTensor` of shape `(num_return_sequences*batch_size, generated_length, hidden_size)`.    """
+    sequences: torch.LongTensor = None
+    scores: Optional[Tuple[torch.FloatTensor]] = None
+    attentions: Optional[Tuple[Tuple[torch.FloatTensor]]] = None
+    hidden_states: Optional[Tuple[Tuple[torch.FloatTensor]]] = None
+    pred_hands: Optional[Tuple[torch.FloatTensor]] = None
 
 
 class HandsOnVLMConfig(LlamaConfig):
