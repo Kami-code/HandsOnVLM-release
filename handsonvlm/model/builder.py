@@ -16,6 +16,7 @@ from handsonvlm.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOK
 
 def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto"):
     kwargs = {"device_map": device_map, 'is_inference': True}
+    print("model_name: ", model_name, "model_base: ", model_base, "model_path: ", model_path)
 
     if load_8bit:
         kwargs['load_in_8bit'] = True
@@ -31,19 +32,17 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         kwargs['torch_dtype'] = torch.float16
     if 'mpt' in model_name.lower():
         warnings.warn("mpt is currently not supported for LITA")
-    if 'lita' not in model_name.lower():
-        warnings.warn("this function is for loading LITA models")
     if 'lora' in model_name.lower() and model_base is not None:
         # todo: support lora for liha
         warnings.warn("lora is currently not supported for LITA")
         warnings.warn('There is `lora` in model name but no `model_base` is provided. If you are loading a LoRA model, please provide the `model_base` argument. Detailed instruction: https://github.com/haotian-liu/LLaVA#launch-a-model-worker-lora-weights-unmerged.')
-        from handsonvlm.model.language_model.lita_llama_hoi_encoder import LihaConfig
-        lora_cfg_pretrained = LihaConfig.from_pretrained(model_path)
+
+        lora_cfg_pretrained = HandsOnVLMConfig.from_pretrained(model_path)
         print("lora_cfg_pretrained: ", lora_cfg_pretrained)
         print("model_base: ", model_base, " model_path: ", model_path)
         tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False)
         print('Loading LLaVA from base model...')
-        model = LihaLlamaForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=lora_cfg_pretrained, **kwargs)
+        model = HandsOnVLMForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=lora_cfg_pretrained, **kwargs)
         token_num, tokem_dim = model.lm_head.out_features, model.lm_head.in_features
         if model.lm_head.weight.shape[0] != token_num:
             model.lm_head.weight = torch.nn.Parameter(torch.empty(token_num, tokem_dim, device=model.device, dtype=model.dtype))
@@ -62,6 +61,7 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
                     filename=filename,
                     subfolder=subfolder)
                 return torch.load(cache_file, map_location='cpu')
+
             non_lora_trainables = load_from_hf(model_path, 'non_lora_trainables.bin')
         non_lora_trainables = {(k[11:] if k.startswith('base_model.') else k): v for k, v in non_lora_trainables.items()}
         if any(k.startswith('model.model.') for k in non_lora_trainables):
@@ -78,14 +78,18 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         print('Loading LIHA from base model...')
         tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False)
         cfg_pretrained = AutoConfig.from_pretrained(model_path)
-        model = LihaLlamaForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=cfg_pretrained, **kwargs)
+        model = HandsOnVLMForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=cfg_pretrained, **kwargs)
 
         mm_projector_weights = torch.load(os.path.join(model_path, 'mm_projector.bin'), map_location='cpu')
         mm_projector_weights = {k: v.to(torch.float16) for k, v in mm_projector_weights.items() if 'mm_projector' in k}
         model.load_state_dict(mm_projector_weights, strict=False)
     else:
+        print(f"loading tokenizer from {model_path}")
         tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
-        model = LihaLlamaForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, **kwargs)
+        print(f"loading model from {model_path} and kwargs: {kwargs}")
+        kwargs['traj_decoder_name'] = 'CVAE'
+        print("using traj_decoder_name: ", kwargs['traj_decoder_name'], "Please check if it is correct")
+        model = HandsOnVLMForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, **kwargs)
 
     mm_use_im_start_end = getattr(model.config, "mm_use_im_start_end", False)
     mm_use_im_patch_token = getattr(model.config, "mm_use_im_patch_token", False)
@@ -98,6 +102,7 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
 
     vision_tower = model.get_vision_tower()
     if not vision_tower.is_loaded:
+        print(f"loading vision tower model from pretrained {vision_tower.vision_tower_name}")
         vision_tower.load_model()
     vision_tower.to(device='cuda', dtype=torch.float16)
     image_processor = vision_tower.image_processor
@@ -149,5 +154,5 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         context_len = model.config.max_sequence_length
     else:
         context_len = 2048
-
+    load_sharded_checkpoint(model, model_path, strict=True)
     return tokenizer, model, image_processor, context_len

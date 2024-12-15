@@ -1,4 +1,3 @@
-import os
 import json
 import copy
 import re
@@ -12,7 +11,7 @@ from tqdm import tqdm
 
 from hoi_forecast.utils.const import anticipation_frames_num
 from hoi_forecast.dataset.epic_structures import EpicHOIDataset
-from handsonvlm.constants import DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_IMAGE_TOKEN, general_trajectory_answer_templates, action_question_templates, general_question_templates, action_answer_templates, action_prediction_templates, general_specific_question_templates
+from handsonvlm.constants import DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_IMAGE_TOKEN, general_trajectory_answer_templates, action_question_templates, general_question_templates, action_answer_templates, action_prediction_templates, general_specific_question_templates, ek_conversation_rbhp_rephrase_dict_path, ek_conversation_rbhp_rephrase_dict_path_val
 from handsonvlm.dataset.base_dataset import preprocess
 from llava import conversation as conversation_lib
 
@@ -179,11 +178,13 @@ class EpicReasoningConversationDataset(EpicConversationDataset):
         assert epic_hoi_dataset.use_wrong_narration is False, "The dataset should use correct narration"
 
         # load rephrase templates
+        assert epic_hoi_dataset.split in ['train', 'validation']
+
         if epic_hoi_dataset.split == "train":
-            reasoning_train_path = "/ocean/projects/cis240031p/cbao/codes/lita/ek100_questions.json"
+            reasoning_train_path = ek_conversation_rbhp_rephrase_dict_path
             print("using training reasoning dataset")
         else:
-            reasoning_train_path = "/ocean/projects/cis240031p/cbao/codes/lita/ek100_questions_val.json"
+            reasoning_train_path = ek_conversation_rbhp_rephrase_dict_path_val
             print("using validation reasoning dataset")
         self.reasoning_templates = {}
         with open(reasoning_train_path, "r") as file:

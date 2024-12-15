@@ -31,6 +31,7 @@ setup(
         'tensorboardX==2.6.2.2',
         'timm==0.6.13',
         'wandb==0.18.1',
-        'pandas==2.2.2'
+        'pandas==2.2.2',
+        'sentencepiece==0.1.99'
     ],
 )

@@ -17,7 +17,7 @@ DEFAULT_IM_START_TOKEN = "<im_start>"
 DEFAULT_IM_END_TOKEN = "<im_end>"
 
 TIME_TOKEN_TEMPLATE = "<t{t}>"
-HAND_TOKEN_TEMPLATE = "<HAND>"
+HAND_TOKEN_TEMPLATE = "<hand_traj>"
 
 
 handsonvlm_utils_dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -66,6 +66,8 @@ general_answer_templates = [
 ]
 
 ek_conversation_rephrase_dict_path = os.path.join(HANDSONVLM_PROJECT_PATH, "assets", "rephrase_ek100.json")
+ek_conversation_rbhp_rephrase_dict_path = os.path.join(HANDSONVLM_PROJECT_PATH, "assets", "ek100_questions.json")
+ek_conversation_rbhp_rephrase_dict_path_val = os.path.join(HANDSONVLM_PROJECT_PATH, "assets", "ek100_questions_val.json")
 
 with open(ek_conversation_rephrase_dict_path, 'r') as file:
     ek_conversation_rephrase_dict = json.load(file)
