@@ -22,7 +22,8 @@ cd handsonvlm-release
 conda create -n handsonvlm python=3.10
 conda activate handsonvlm
 conda install pytorch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 pytorch-cuda=12.4 cuda -c pytorch -c nvidia
-pip install .
+pip install -e .
+pip install flash-attn==2.6.3 --no-build-isolation
 ```
 
 2. Download the assets from
