@@ -1,0 +1,63 @@
+#!/bin/bash
+
+MODEL_VERSION="vicuna-v1-3-7b"
+
+
+deepspeed --master_port 24999 handsonvlm/train/train_mem.py  \
+--deepspeed ./scripts/zero3.json  \
+--model_name_or_path ./checkpoints/$MODEL_VERSION  \
+--version $MODEL_VERSION  \
+--data_path <path_to_lita_dataset>  \
+--vision_tower openai/clip-vit-large-patch14  \
+--pretrain_mm_mlp_adapter ./checkpoints/llava-$MODEL_VERSION-pretrain/mm_projector.bin  \
+--mm_vision_select_layer -2  \
+--mm_use_im_start_end False  \
+--mm_use_im_patch_token False  \
+--bf16 True  \
+--output_dir ./checkpoints/HandsOnVLM-CVAE-7B  \
+--epic_kitchen_use_percentage 1 \
+--num_train_epochs 40  \
+--per_device_train_batch_size 16  \
+--gradient_accumulation_steps 1  \
+--per_device_eval_batch_size 8  \
+--evaluation_strategy "no"  \
+--logging_strategy "epoch"  \
+--report_to "tensorboard"  \
+--logging_steps 5  \
+--save_strategy "epoch"  \
+--save_steps 5  \
+--save_total_limit 100  \
+--learning_rate 2e-5  \
+--weight_decay 0.  \
+--warmup_ratio 0.03  \
+--lr_scheduler_type "cosine"  \
+--tf32 True  \
+--model_max_length 2048  \
+--gradient_checkpointing True  \
+--dataloader_num_workers 4  \
+--lazy_preprocess True  \
+--tasks "dvc||event_loc||imgqa||vidqa||temporal_reasoning||epic_kitchen"  \
+--dvc_data "activitynet||youcook2"  \
+--event_loc_data "activitynet||youcook2"  \
+--imgqa_data "llava"  \
+--vidqa_data "nextqa"  \
+--temporal_reasoning_data "activitynet"  \
+--epic_kitchen_data "narration_conversation || reasoning_conversation" \
+--hoi_ref_data "epic||ego4d" \
+--task_sample_rate 1 1 1 1 1 5 \
+--hoi_lambda 1 \
+--dvc_sample_rate 5 1  \
+--event_loc_sample_rate 5 1  \
+--imgqa_sample_rate 1  \
+--vidqa_sample_rate 1  \
+--temporal_reasoning_sample_rate 1  \
+--epic_kitchen_sample_rate 1 1 \
+--hoi_ref_sample_rate 1 0 \
+--samples_per_epoch 48296  \
+--ek_conversation_rephrase_rate 0.5  \
+--ek_version "ek100"   \
+--fuse_input_mode 'origin'  \
+--video_arch "temporal_spatial_pool"  \
+--traj_decoder "CVAE" \
+--backbone "handsonvlm" \
+--ddp_backend gloo
