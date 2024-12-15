@@ -58,12 +58,7 @@ class EpicConversationDataset(Dataset):
             i = rng.randint(0, self.__len__())  # random index
         hoi_feature_dict: dict = self.get_sources(i)
         # add <image> to first human
-        # print("before conversation: ", hoi_feature_dict['conversations'])
-        # print(" hoi_feature_dict['conversations'][0]['value'] = ", hoi_feature_dict['conversations'][0]['value'])
         hoi_feature_dict['conversations'][0]['value'] = DEFAULT_IMAGE_TOKEN + '\n' + hoi_feature_dict['conversations'][0]['value']
-
-        # print("conversation: ", hoi_feature_dict['conversations'])
-
         # tokenize the sentences
         sources = copy.deepcopy(hoi_feature_dict)
         if isinstance(i, int):
@@ -166,8 +161,7 @@ class EpicReasoningConversationDataset(EpicConversationDataset):
             hand_traj_str += "<hand_traj>"
         narration = hoi_feature_dict["narration"]
         selected_answer = random.choice(general_trajectory_answer_templates).format(hand_traj_str)
-        image_abs_paths = hoi_feature_dict["image_abs_paths"]
-        last_image_path = image_abs_paths[-1]
+        last_image_path = hoi_feature_dict["name"][-1]
 
         questions = self.reasoning_templates[last_image_path]
 
