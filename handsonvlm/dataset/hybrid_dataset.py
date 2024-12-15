@@ -10,11 +10,11 @@ from hoi_forecast.dataset.dataset import get_epic_hoi_dataset_by_name
 from handsonvlm.dataset.epic_dataset import *
 from handsonvlm.arguments import DataArguments
 from handsonvlm.constants import IGNORE_INDEX
-from handsonvlm.dataset.dvc_dataset import DVCDataset_activitynet, DVCDataset_howto100m, DVCDataset_youcook2, DVCDataset_vitt
-from handsonvlm.dataset.event_loc_dataset import EventLocDataset_activitynet, EventLocDataset_youcook2, EventLocDataset_vitt
-from handsonvlm.dataset.vidqa_dataset import VidQADataset_msrvttqa, VidQADataset_msvdqa, VidQADataset_nextqa, VidQADataset_videochat
-from handsonvlm.dataset.instruct_dataset import LlavaDataset
-from handsonvlm.dataset.temporal_reasoning_dataset import TemporalReasoningDataset_activitynet
+from lita.dataset.dvc_dataset import DVCDataset_activitynet, DVCDataset_howto100m, DVCDataset_youcook2, DVCDataset_vitt
+from lita.dataset.event_loc_dataset import EventLocDataset_activitynet, EventLocDataset_youcook2, EventLocDataset_vitt
+from lita.dataset.vidqa_dataset import VidQADataset_msrvttqa, VidQADataset_msvdqa, VidQADataset_nextqa, VidQADataset_videochat
+from lita.dataset.instruct_dataset import LlavaDataset
+from lita.dataset.temporal_reasoning_dataset import TemporalReasoningDataset_activitynet
 
 
 class HybridDataset(Dataset):

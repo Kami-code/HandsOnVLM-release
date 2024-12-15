@@ -12,7 +12,7 @@ from tqdm import tqdm
 from hoi_forecast.utils.const import anticipation_frames_num
 from hoi_forecast.dataset.epic_structures import EpicHOIDataset
 from handsonvlm.constants import DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_IMAGE_TOKEN, general_trajectory_answer_templates, action_question_templates, general_question_templates, action_answer_templates, action_prediction_templates, general_specific_question_templates, ek_conversation_rbhp_rephrase_dict_path, ek_conversation_rbhp_rephrase_dict_path_val
-from handsonvlm.dataset.base_dataset import preprocess
+from lita.dataset.base_dataset import preprocess
 from llava import conversation as conversation_lib
 
 

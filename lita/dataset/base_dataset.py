@@ -400,7 +400,6 @@ class BaseDataset(Dataset):
 
     def init_list_data_dict(self):
         pass
-        # self.list_data_dict = json.load(open(self.data_path, "r"))
 
     def load_image(self, image_path):
         processor = self.data_args.image_processor
@@ -418,14 +417,10 @@ class BaseDataset(Dataset):
         return load_video(video_path, processor, num_frames)
 
     def get_sources(self, i):
-        # list_data_dict[i]['conversations'] = [{"from": "human", "value": DEFAULT_IMAGE_TOKEN}, 
-        #                                       {"from": "gpt", "value": gpt_value}]
-        # return self.list_data_dict[i]
         pass
 
     def get_visual(self, sources):
         pass
-        # return self.load_image(sources['image'])
 
     def __getitem__(self, i):
         rng = np.random.RandomState()  # local rng independent of global
