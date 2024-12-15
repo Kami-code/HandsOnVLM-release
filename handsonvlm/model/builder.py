@@ -7,8 +7,9 @@
 import os
 import warnings
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BitsAndBytesConfig
 import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BitsAndBytesConfig
+from transformers.modeling_utils import load_sharded_checkpoint
 
 from handsonvlm.model import *
 from handsonvlm.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, TIME_TOKEN_TEMPLATE, HAND_TOKEN_TEMPLATE
