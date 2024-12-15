@@ -1,6 +1,8 @@
 import copy
 
+import numpy as np
 import torch
+from tqdm import tqdm
 
 from handsonvlm.model.builder import load_pretrained_model
 from hoi_forecast.dataset.dataset import get_epic_hoi_dataset_by_name
@@ -8,10 +10,53 @@ from hoi_forecast.dataset.epic_structures import EpicHOIDataset
 
 from handsonvlm.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN
 from handsonvlm.dataset.epic_dataset import EpicConversationDataset, EpicReasoningConversationDataset
+from hoi_forecast.evaluation.traj_eval import evaluate_traj_stochastic
 
 from llava.utils import disable_torch_init
 from llava.conversation import conv_templates
 from llava.mm_utils import tokenizer_image_token, get_model_name_from_path
+
+
+def evaluate_traj(cur_split_dict):
+    print("len(cur_split_dict) = ", len(cur_split_dict))
+    preds_traj = []
+    gts_traj = []
+    valids_traj = []
+    hand_pred_cnt = 0
+    total_pred_cnt = 0
+    for index, batch in enumerate(cur_split_dict.keys()):
+        cur_batch_dict = cur_split_dict[batch]
+        pred_hand_trajectory = cur_batch_dict['pred_hand_trajectory']
+        pred_hand_is_valid = cur_batch_dict['pred_hand_is_valid']
+        pred_trajectory_is_valid = cur_batch_dict['pred_trajectory_is_valid']
+
+        total_pred_cnt += 1
+        if not pred_trajectory_is_valid:
+            continue
+        hand_pred_cnt += 1
+
+        future_hands = cur_batch_dict['future_hands']
+        future_valid = cur_batch_dict['future_valid']
+
+        if pred_hand_trajectory.shape == (1, 1, 2, 5, 2):
+            pred_hand_trajectory = pred_hand_trajectory[:, :, :, 1:, :]
+        if future_hands.shape == (1, 2, 5, 2):
+            future_hands = future_hands[:, :, 1:, :]
+
+        assert pred_hand_trajectory.shape == (1, 1, 2, 4, 2)
+        assert future_hands.shape == (1, 2, 4, 2)
+        assert future_valid.shape == (1, 2), future_valid.shape
+
+        preds_traj.append(pred_hand_trajectory)
+        gts_traj.append(future_hands)
+        valids_traj.append(future_valid)
+
+    gts_traj = np.concatenate(gts_traj)
+    preds_traj = np.concatenate(preds_traj)
+    valids_traj = np.concatenate(valids_traj)
+
+    ade, fde, wde = evaluate_traj_stochastic(preds_traj, gts_traj, valids_traj)
+    print(f"ade = {ade} fde = {fde} wde = {wde}")
 
 
 class HandsOnVLMInference:
@@ -95,9 +140,7 @@ class HandsOnVLMInference:
                                                                             use_percentage=1)
             dataset = EpicConversationDataset(tokenizer=self.tokenizer, epic_hoi_dataset=epic_hoi_dataset, deterministic=True)
         val_info = {}
-        for batch_idx in range(len(dataset)):
-            print(f"{batch_idx} / {len(dataset)}")
-
+        for batch_idx in tqdm(range(len(dataset))):
             sample = dataset[batch_idx]
             sample['image'] = sample['image'].unsqueeze(0).half().cuda()
             sample["future_hands"] = sample["future_hands"].unsqueeze(0).cuda()
@@ -113,20 +156,21 @@ class HandsOnVLMInference:
             self.conv.append_message(self.conv.roles[1], None)
             prompt = self.conv.get_prompt()
             sample['input_ids'] = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
-            pred_hands, pred_hand_valid = self.inference(sample)
+            pred_hands, pred_trajectory_is_valid = self.inference(sample)
             # evaluate hand trajectory
             future_hands = sample['future_hands'][:, :, :, :].cpu().float().numpy()
             future_valid = sample['future_valid'].cpu().float().numpy()
             result = {}
-            result['pred_hand_trajectory'] = pred_hands.cpu().numpy() if pred_hand_valid else None
+            result['pred_hand_trajectory'] = pred_hands.cpu().numpy() if pred_trajectory_is_valid else None
             result['pred_hand_is_valid'] = None
-            result['pred_trajectory_is_valid'] = pred_hand_valid
+            result['pred_trajectory_is_valid'] = pred_trajectory_is_valid
             result['future_hands'] = future_hands
             result['future_valid'] = future_valid
             result["image_abs_paths"] = image_abs_paths
             result['prompt'] = sample['prompt']
             result["answer"] = self.conv.messages[-1][1]
             val_info[batch_idx] = result
+            evaluate_traj(val_info)
         return val_info
 
 
