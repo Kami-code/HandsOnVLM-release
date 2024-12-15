@@ -148,7 +148,7 @@ class EpicReasoningConversationDataset(EpicConversationDataset):
         for index, action in tqdm(enumerate(self.epic_hoi_dataset.actions)):
             hoi_feature_dict = self.epic_hoi_dataset.load_hoi_features(action)
             last_image_path = hoi_feature_dict['image_paths'][-1]
-            print("self.reasoning_templates = ", self.reasoning_templates[-1])
+            print("self.reasoning_templates = ", self.reasoning_templates)
 
             print("last_image_path = ", last_image_path)
             print("in ", last_image_path in self.reasoning_templates)
