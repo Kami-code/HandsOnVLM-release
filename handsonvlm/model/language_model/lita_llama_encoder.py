@@ -6,9 +6,9 @@ from transformers import LlamaForCausalLM
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
 from hoi_forecast.model.visual_to_tokens import VisualToTokenHelper
-from llava.model.language_model.llava_llama import LlavaLlamaModel
 from handsonvlm.model.handsonvlm_arch import HandsOnVLMMetaForCausalLM
 from handsonvlm.constants import IGNORE_INDEX, IMAGE_TOKEN_INDEX
+from llava.model.language_model.llava_llama import LlavaLlamaModel
 
 
 class LitaLlamaForCausalLM_encoder(LlamaForCausalLM, HandsOnVLMMetaForCausalLM):

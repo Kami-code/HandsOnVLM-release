@@ -1,22 +1,20 @@
 import warnings
 from typing import List, Optional, Tuple, Union
 
-import torch
-from torch.nn import CrossEntropyLoss
-import deepspeed
 import wandb
-from transformers import LlamaConfig
+import deepspeed
+import torch.distributed as dist
+from torch.nn import CrossEntropyLoss
+from transformers import LlamaConfig, LogitsProcessorList, StoppingCriteriaList
+from transformers.generation import validate_stopping_criteria
+from transformers.generation.utils import SampleOutput, SampleDecoderOnlyOutput, SampleEncoderDecoderOutput
+from transformers.modeling_outputs import CausalLMOutputWithPast
+
 
 from handsonvlm.constants import IGNORE_INDEX, IMAGE_TOKEN_INDEX
 from handsonvlm.model.language_model.lita_llama_hoi import LitaLlamaForCausalLM_hoi
 from handsonvlm.model.language_model.traj_decoder import *
 from hoi_forecast.model.visual_to_tokens import VisualToTokenHelper
-
-from transformers import LlamaConfig, LogitsProcessorList, StoppingCriteriaList
-from transformers.generation import validate_stopping_criteria
-from transformers.generation.utils import SampleOutput, SampleDecoderOnlyOutput, SampleEncoderDecoderOutput
-import torch.distributed as dist
-from transformers.modeling_outputs import CausalLMOutputWithPast
 
 
 class HandsOnVLMConfig(LlamaConfig):

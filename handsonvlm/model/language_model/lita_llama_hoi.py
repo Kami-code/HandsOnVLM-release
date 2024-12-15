@@ -10,9 +10,9 @@ from transformers.modeling_outputs import CausalLMOutputWithPast
 from hoi_forecast.architecture.affordance_decoder import AffordanceCVAE
 from hoi_forecast.architecture.net_utils import get_subsequent_mask, get_pad_mask, traj_affordance_dist
 from hoi_forecast.architecture.traj_decoder import TrajCVAE
-from hoi_forecast.architecture.object_transformer import ObjectTransformerDecoder, ObjectTransformerEncoder
-from handsonvlm.model.language_model.lita_llama_hoi_encoder import LitaLlamaForCausalLM_hoi_encoder
+from hoi_forecast.architecture.object_transformer import ObjectTransformerDecoder
 from hoi_forecast.model.visual_to_tokens import VisualToTokenHelper
+from handsonvlm.model.language_model.lita_llama_hoi_encoder import LitaLlamaForCausalLM_hoi_encoder
 
 
 class LitaConfig_hoi(LlamaConfig):
