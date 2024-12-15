@@ -1,16 +1,15 @@
 from typing import Dict
 from dataclasses import dataclass
 
-import torch
+
+from torch.utils.data import Dataset
 import transformers
 from transformers import CLIPImageProcessor
 
 from hoi_forecast.dataset.dataset import get_epic_hoi_dataset_by_name
-# from hoi_forecast.dataset_general.dataset import HandTrajectoryDataset
 from handsonvlm.dataset.epic_dataset import *
 from handsonvlm.arguments import DataArguments
 from handsonvlm.constants import IGNORE_INDEX
-# from liha.dataset.epic_general_dataset import EpicGeneralConversationDataset
 from handsonvlm.dataset.dvc_dataset import DVCDataset_activitynet, DVCDataset_howto100m, DVCDataset_youcook2, DVCDataset_vitt
 from handsonvlm.dataset.event_loc_dataset import EventLocDataset_activitynet, EventLocDataset_youcook2, EventLocDataset_vitt
 from handsonvlm.dataset.vidqa_dataset import VidQADataset_msrvttqa, VidQADataset_msvdqa, VidQADataset_nextqa, VidQADataset_videochat
@@ -54,11 +53,8 @@ class HybridDataset(Dataset):
                 'activitynet': TemporalReasoningDataset_activitynet,
             },
             'epic_kitchen': {
-                'narration_conversation': EpicConversationDataset,
-                'narration_rejection': EpicNarrationRejectionConversationDataset,
-                'action_prediction': EpicActionPredictionConversationDataset,
-                'narration_only': EpicNarrationDataset,
-                # 'general_conversation': EpicGeneralConversationDataset,
+                'narration_conversation': EpicConversationDataset
+                # reasoning dataset is not defined here
             }
         }
 
@@ -83,12 +79,7 @@ class HybridDataset(Dataset):
                                                                                                   rephrase_rate=data_args.ek_conversation_rephrase_rate,
                                                                                                   use_wrong_narration=False,
                                                                                                   use_percentage=data_args.epic_kitchen_use_percentage)
-                # epic_conv_dataset = EpicConversationDataset(tokenizer, epic_hoi_dataset_correct_narration)
-                if "narration_conversation_single" in task_data:
-                    epic_conv_dataset = EpicConversationDataset(tokenizer, epic_hoi_dataset_correct_narration)
-                    datasets.append(epic_conv_dataset)
-                    sample_counts.append(len(epic_conv_dataset))
-                elif "narration_conversation" in task_data:
+                if "narration_conversation" in task_data:
                     epic_conv_dataset = EpicMultiturnConversationDataset(tokenizer, epic_hoi_dataset_correct_narration)
                     datasets.append(epic_conv_dataset)
                     sample_counts.append(len(epic_conv_dataset))
@@ -96,37 +87,6 @@ class HybridDataset(Dataset):
                     epic_reasoning_conv_dataset = EpicReasoningConversationDataset(tokenizer, epic_hoi_dataset_correct_narration)
                     datasets.append(epic_reasoning_conv_dataset)
                     sample_counts.append(len(epic_reasoning_conv_dataset))
-                if "general_conversation" in task_data:
-                    epic_hoi_dataset = HandTrajectoryDataset(image_processor)
-                    epic_general_conv_dataset = EpicGeneralConversationDataset(tokenizer, epic_hoi_dataset)
-                    datasets.append(epic_general_conv_dataset)
-                    sample_counts.append(len(epic_general_conv_dataset))
-                if "text_only_representation" in task_data:
-                    epic_text_rep_dataset = EpicTextOnlyConversationDataset(tokenizer, epic_hoi_dataset_correct_narration)
-                    datasets.append(epic_text_rep_dataset)
-                    sample_counts.append(len(epic_text_rep_dataset))
-                if "piexl2seq_representation" in task_data:
-                    epic_pixel_rep_dataset = EpicPixelSeqConversationDataset(tokenizer, epic_hoi_dataset_correct_narration)
-                    datasets.append(epic_pixel_rep_dataset)
-                    sample_counts.append(len(epic_pixel_rep_dataset))
-                if "narration_only" in task_data:
-                    epic_narr_dataset = EpicNarrationDataset(tokenizer, epic_hoi_dataset_correct_narration)
-                    datasets.append(epic_narr_dataset)
-                    sample_counts.append(len(epic_narr_dataset))
-                if "narration_rejection" in task_data:
-                    epic_hoi_dataset_wrong_narration: EpicHOIDataset = get_epic_hoi_dataset_by_name(ek_version='ek100',
-                                                                                                    split='train',
-                                                                                                    image_processor=image_processor,
-                                                                                                    rephrase_rate=data_args.ek_conversation_rephrase_rate,
-                                                                                                    use_wrong_narration=True,
-                                                                                                    use_percentage=data_args.epic_kitchen_use_percentage)
-                    epic_narr_rej_conv_dataset = EpicNarrationRejectionConversationDataset(tokenizer, epic_hoi_dataset_wrong_narration)
-                    datasets.append(epic_narr_rej_conv_dataset)
-                    sample_counts.append(len(epic_narr_rej_conv_dataset))
-                if "action_prediction" in task_data:
-                    epic_action_pred_conv_dataset = EpicActionPredictionConversationDataset(tokenizer, epic_hoi_dataset_correct_narration)
-                    datasets.append(epic_action_pred_conv_dataset)
-                    sample_counts.append(len(epic_action_pred_conv_dataset))
 
             sample_rate = getattr(data_args, task + '_sample_rate', sample_counts)
             assert len(sample_rate) == len(datasets), f"sample rate = {sample_rate}, datasets = {datasets}"

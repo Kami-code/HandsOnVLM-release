@@ -34,7 +34,6 @@ def preprocess_multimodal(sources: Sequence[str], mm_use_im_start_end=False) -> 
 
 
 def extract_questions(value):
-    # 使用正则表达式匹配双引号内的内容
     pattern = r'"([^"]*)"'
     questions = re.findall(pattern, value)
     return questions
@@ -60,33 +59,6 @@ class EpicConversationDataset(Dataset):
             print(f"loaded reasoning templates, len = {len(self.reasoning_templates)}, total questions = {cnt}")
         self.deterministic = deterministic
 
-    # def get_sources(self, i) -> dict:
-    #     hoi_feature_dict, _ = self.epic_hoi_dataset.__getitem__(i)
-    #     hand_traj_str = ""
-    #     for j in range(anticipation_frames_num):
-    #         hand_traj_str += "<hand_traj>"
-    #     narration = hoi_feature_dict["narration"]
-    #     selected_answer = random.choice(general_trajectory_answer_templates).format(hand_traj_str)
-    #     image_abs_paths = hoi_feature_dict["image_abs_paths"]
-    #     last_image_path = image_abs_paths[-1]
-    #
-    #     if self.epic_hoi_dataset.split == "validation" and last_image_path in self.reasoning_templates and self.epic_hoi_dataset.rephrase_rate == 1:
-    #         # assert last_image_path in self.reasoning_templates, f"last_image_path = {last_image_path}"
-    #         questions = self.reasoning_templates[last_image_path]
-    #         if len(questions) == 0:
-    #             print("this is strange that the question list are empty: ", last_image_path)
-    #             selected_question = random.choice(action_question_templates).format(narration)
-    #         else:
-    #
-    #             selected_question = random.choice(questions)
-    #             print(f"rephrased question = {selected_question}, action narration = {narration}")
-    #     else:
-    #         print("using explicit narration!!")
-    #         selected_question = random.choice(action_question_templates).format(narration)
-    #     hoi_feature_dict['conversations'] = [{"from": "human", "value": selected_question},
-    #                                          {"from": "gpt", "value": selected_answer}]
-    #     hoi_feature_dict['prompt'] = selected_question
-    #     return hoi_feature_dict
 
     def __len__(self):
         return self.epic_hoi_dataset.__len__()
@@ -233,6 +205,7 @@ class EpicReasoningConversationDataset(EpicConversationDataset):
         hoi_feature_dict['prompt'] = selected_question
         return hoi_feature_dict
 
+
 class EpicMultiturnConversationDataset(EpicConversationDataset):
     def __init__(self, tokenizer, epic_hoi_dataset: EpicHOIDataset):
         super(EpicConversationDataset, self).__init__()
@@ -285,161 +258,3 @@ class EpicMultiturnConversationDataset(EpicConversationDataset):
 
         hoi_feature_dict['prompt'] = ""
         return hoi_feature_dict
-
-
-class EpicTextOnlyConversationDataset(EpicConversationDataset):
-    def __init__(self, tokenizer, epic_hoi_dataset: EpicHOIDataset):
-        super(EpicConversationDataset, self).__init__()
-        self.epic_hoi_dataset: EpicHOIDataset = epic_hoi_dataset
-        self.tokenizer = tokenizer
-        assert epic_hoi_dataset.use_wrong_narration is False, "The dataset should use correct narration"
-
-
-    def get_sources(self, i) -> dict:
-        hoi_feature_dict, _ = self.epic_hoi_dataset.__getitem__(i)
-        gt_hands = hoi_feature_dict['gt_hands'][:, 1:, :]
-        assert gt_hands.shape == (2, 4, 2), gt_hands.shape
-        # convert the gt_hands to hand_traj_str
-        hand_traj_string_left = ""
-        hand_traj_string_right = ""
-        for j in range(4):
-            gt_hand_right = gt_hands[0, j]
-            gt_hand_left = gt_hands[1, j]
-            hand_traj_string_right += "(" + str(gt_hand_right[0]) + "," + str(gt_hand_right[1]) + ")"
-            hand_traj_string_left += "(" + str(gt_hand_left[0]) + "," + str(gt_hand_left[1]) + ")"
-        hand_traj_str = "right hand: " + hand_traj_string_right + " left hand: " + hand_traj_string_left
-        narration = hoi_feature_dict["narration"]
-
-        selected_question = random.choice(action_question_templates).format(narration)
-        selected_answer = random.choice(action_answer_templates).format(narration, hand_traj_str)
-        hoi_feature_dict['conversations'] = [{"from": "human", "value": selected_question},
-                                             {"from": "gpt", "value": selected_answer}]
-        hoi_feature_dict['prompt'] = selected_question
-        return hoi_feature_dict
-
-
-class EpicPixelSeqConversationDataset(EpicConversationDataset):
-    def __init__(self, tokenizer, epic_hoi_dataset: EpicHOIDataset):
-        super(EpicConversationDataset, self).__init__()
-        self.epic_hoi_dataset: EpicHOIDataset = epic_hoi_dataset
-        self.tokenizer = tokenizer
-        assert epic_hoi_dataset.use_wrong_narration is False, "The dataset should use correct narration"
-        self.n_bins = 400
-
-    def get_sources(self, i) -> dict:
-        hoi_feature_dict, _ = self.epic_hoi_dataset.__getitem__(i)
-        gt_hands = hoi_feature_dict['gt_hands'][:, 1:, :]
-        assert gt_hands.shape == (2, 4, 2), gt_hands.shape
-        # convert the gt_hands to hand_traj_str
-        hand_traj_string_left = ""
-        hand_traj_string_right = ""
-
-        def float_2_bin(x):
-            x_disc = int(np.floor(x * self.n_bins))
-            x_disc = max(0, min(x_disc, self.n_bins - 1))
-            bin_str = f"<bin_{x_disc}>"
-            return bin_str
-
-        for j in range(4):
-            gt_hand_right = gt_hands[0, j]
-            gt_hand_left = gt_hands[1, j]
-            hand_traj_string_right += "(" + float_2_bin(gt_hand_right[0]) + "," + float_2_bin(gt_hand_right[1]) + ")"
-            hand_traj_string_left += "(" + float_2_bin(gt_hand_left[0]) + "," + float_2_bin(gt_hand_left[1]) + ")"
-        hand_traj_str = "right hand: " + hand_traj_string_right + " left hand: " + hand_traj_string_left
-        narration = hoi_feature_dict["narration"]
-
-        selected_question = random.choice(action_question_templates).format(narration)
-        selected_answer = random.choice(action_answer_templates).format(narration, hand_traj_str)
-        hoi_feature_dict['conversations'] = [{"from": "human", "value": selected_question},
-                                             {"from": "gpt", "value": selected_answer}]
-        # print("convo: ", hoi_feature_dict['conversations'])
-        hoi_feature_dict['prompt'] = selected_question
-        return hoi_feature_dict
-
-
-class EpicSeperateHandConversationDataset(EpicConversationDataset):
-    def __init__(self, tokenizer, epic_hoi_dataset: EpicHOIDataset):
-        super(EpicConversationDataset, self).__init__()
-        self.epic_hoi_dataset: EpicHOIDataset = epic_hoi_dataset
-        self.tokenizer = tokenizer
-        assert epic_hoi_dataset.use_wrong_narration is False, "The dataset should use correct narration"
-
-    def get_sources(self, i) -> dict:
-        hoi_feature_dict, _ = self.epic_hoi_dataset.__getitem__(i)
-        gt_hands = hoi_feature_dict['gt_hands'][:, 1:, :]
-        assert gt_hands.shape == (2, 4, 2), gt_hands.shape
-        # convert the gt_hands to hand_traj_str
-        hand_traj_string_left = ""
-        hand_traj_string_right = ""
-
-        for j in range(4):
-            hand_traj_string_right += "<hand_traj>"
-            hand_traj_string_left += "<hand_traj>"
-        hand_traj_str = "right hand: " + hand_traj_string_right + " left hand: " + hand_traj_string_left
-        narration = hoi_feature_dict["narration"]
-
-        selected_question = random.choice(action_question_templates).format(narration)
-        selected_answer = random.choice(action_answer_templates).format(narration, hand_traj_str)
-        hoi_feature_dict['conversations'] = [{"from": "human", "value": selected_question},
-                                             {"from": "gpt", "value": selected_answer}]
-        # print("convo: ", hoi_feature_dict['conversations'])
-        hoi_feature_dict['prompt'] = selected_question
-        return hoi_feature_dict
-
-
-class EpicNarrationDataset(EpicConversationDataset):
-    def __init__(self, tokenizer, epic_hoi_dataset: EpicHOIDataset):
-        super(EpicConversationDataset, self).__init__()
-        self.epic_hoi_dataset: EpicHOIDataset = epic_hoi_dataset
-        self.tokenizer = tokenizer
-        assert epic_hoi_dataset.use_wrong_narration is False, "The dataset should use correct narration"
-
-    def get_sources(self, i) -> dict:
-        hoi_feature_dict, _ = self.epic_hoi_dataset.__getitem__(i)
-        narration = hoi_feature_dict["narration"]
-        hoi_feature_dict['conversations'] = [{"from": "human", "value": narration},
-                                             {"from": "gpt", "value": narration}]
-        hoi_feature_dict['prompt'] = narration
-        return hoi_feature_dict
-
-
-class EpicActionPredictionConversationDataset(EpicConversationDataset):
-    def __init__(self, tokenizer, epic_hoi_dataset: EpicHOIDataset):
-        super(EpicConversationDataset, self).__init__()
-        self.epic_hoi_dataset: EpicHOIDataset = epic_hoi_dataset
-        self.tokenizer = tokenizer
-        assert epic_hoi_dataset.use_wrong_narration is False, "The dataset should use correct narration"
-
-    def get_sources(self, i) -> dict:
-        hoi_feature_dict, action = self.epic_hoi_dataset.__getitem__(i)
-        narration = hoi_feature_dict["narration"]
-        action_prediction_answer_templates = []
-        action_prediction_answer_templates.append("The predicted action in this video is {}.".format(narration))
-        action_prediction_answer_templates.append("The expected action in this video is {}.".format(narration))
-        action_prediction_answer_templates.append("The action that is going to happen in this video is {}. Because there are {} in the video.".format(narration, action.noun))
-        selected_question = random.choice(action_prediction_templates)
-        selected_answer = random.choice(action_prediction_answer_templates)
-        hoi_feature_dict['conversations'] = [{"from": "human", "value": selected_question},
-                                             {"from": "gpt", "value": selected_answer}]
-        return hoi_feature_dict
-
-
-class EpicNarrationRejectionConversationDataset(EpicConversationDataset):
-    def __init__(self, tokenizer, epic_hoi_dataset: EpicHOIDataset):
-        super(EpicConversationDataset, self).__init__()
-        self.epic_hoi_dataset: EpicHOIDataset = epic_hoi_dataset
-        self.tokenizer = tokenizer
-        assert epic_hoi_dataset.use_wrong_narration is True, "The dataset should use wrong narration"
-
-    def get_sources(self, i) -> dict:
-        sample, wrong_action = self.epic_hoi_dataset.__getitem__(i)
-
-        wrong_narration = sample['narration']
-        selected_question = random.choice(action_question_templates).format(wrong_narration)
-        reject_answer_templates = []
-        reject_answer_templates.append("I'm sorry, it seems impossible to {} in this video.".format(wrong_narration))
-        reject_answer_templates.append("I'm sorry, I can't provide the hand trajectory because there is no {} in this video.".format(wrong_action.noun))
-        selected_answer = random.choice(reject_answer_templates)
-        sample['conversations'] = [{"from": "human", "value": selected_question},
-                                   {"from": "gpt", "value": selected_answer}]
-        return sample
