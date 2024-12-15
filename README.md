@@ -17,17 +17,20 @@ This repo contains the training and inference code for HandsOnVLM.
 1. Clone the repo and Create a conda env with all the Python dependencies.
 
 ```bash
-git clone --recurse-submodules git@github.com:Kami-code/handsonvlm-release.git
+git clone git@github.com:Kami-code/handsonvlm-release.git
 cd handsonvlm-release
 conda create -n handsonvlm python=3.10
 conda activate handsonvlm
-conda install pytorch torchvision torchaudio pytorch-cuda=12.4 cuda -c pytorch -c nvidia
-pip install opencv-python wandb lmdbdict tqdm scikit-learn einops pandas
+conda install pytorch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 pytorch-cuda=12.4 cuda -c pytorch -c nvidia
+pip install .
 ```
 
 2. Download the assets from
 the [Google Drive](https://drive.google.com/file/d/1qc-v50eTEjpkRoWsxfqExvC1P_EKSFAa/view?usp=drive_link) and place 
 the `asset` directory at the project root directory.
+
+ln -s /ocean/projects/cis240031p/cbao/datasets/epic-kitchens-download-scripts/EPIC-KITCHENS ./data/
+
 
 ## File Structure
 The file structure is listed as follows:
