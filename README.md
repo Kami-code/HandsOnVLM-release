@@ -32,7 +32,7 @@ the `asset` directory at the project root directory.
 ## File Structure
 The file structure is listed as follows:
 
-`hoi-forecast`: dataset code and helper functions for handsonvlm and hoi-forecast
+`hoi-forecast/`: dataset code and helper functions for handsonvlm and hoi-forecast
 
 `handsonvlm/`: model and training code for handsonvlm
 
@@ -42,36 +42,6 @@ The file structure is listed as follows:
 
 ## Quick Start
 
-### Example of Evaluate on epic100
-
-
-```bash
-python examples/random_action.py --task_name=laptop
-```
-
-`task_name`: name of the environment [`faucet`, `laptop`, `bucket`, `toilet`]
-
-### Example for Inference on user input
-
-```bash
-python examples/visualize_observation.py --task_name=laptop
-```
-`task_name`: name of the environment [`faucet`, `laptop`, `bucket`, `toilet`]
-
-
-### Example for Training
-
-```bash
-/bin/bash HandsOnVLM-13B-full-task-reasoning-bs128.sh
-```
-
-## Main Results
-```bash
-python examples/evaluate_policy.py --task_name=laptop --checkpoint_path assets/rl_checkpoints/laptop/laptop_nopretrain_0.zip --eval_per_instance 100
-python examples/evaluate_policy.py --task_name=laptop --use_test_set --checkpoint_path assets/rl_checkpoints/laptop/laptop_nopretrain_0.zip --eval_per_instance 100
-```
-
-## Visual Pretraining
 
 ## Bibtex
 
