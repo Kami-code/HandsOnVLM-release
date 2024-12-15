@@ -54,7 +54,6 @@ class EpicConversationDataset(Dataset):
     def __getitem__(self, i):
         if not self.deterministic:
             rng = np.random.RandomState()  # local rng independent of global
-            print("self.len = ", self.__len__())
             i = rng.randint(0, self.__len__())  # random index
         hoi_feature_dict: dict = self.get_sources(i)
         # add <image> to first human
@@ -104,13 +103,13 @@ class EpicConversationDataset(Dataset):
             hand_traj_str += "<hand_traj>"
         narration = hoi_feature_dict["narration"]
         selected_answer = random.choice(general_trajectory_answer_templates).format(hand_traj_str)
-        print("using explicit narration!!")
         selected_question = random.choice(action_question_templates).format(narration)
 
         hoi_feature_dict['conversations'] = [{"from": "human", "value": selected_question},
                                              {"from": "gpt", "value": selected_answer}]
         hoi_feature_dict['prompt'] = selected_question
         return hoi_feature_dict
+
 
 class EpicReasoningConversationDataset(EpicConversationDataset):
     def __init__(self, tokenizer, epic_hoi_dataset: EpicHOIDataset, deterministic=False):
@@ -124,10 +123,8 @@ class EpicReasoningConversationDataset(EpicConversationDataset):
 
         if epic_hoi_dataset.split == "train":
             reasoning_train_path = ek_conversation_rbhp_rephrase_dict_path
-            print("using training reasoning dataset")
         else:
             reasoning_train_path = ek_conversation_rbhp_rephrase_dict_path_val
-            print("using validation reasoning dataset")
         self.reasoning_templates = {}
         with open(reasoning_train_path, "r") as file:
             rephrase_file = json.load(file)
@@ -165,7 +162,6 @@ class EpicReasoningConversationDataset(EpicConversationDataset):
 
         questions = self.reasoning_templates[last_image_path]
 
-        print("rephrase using RBHP dataset!!")
         selected_question = random.choice(questions)
         # print(f"rephrased question = {selected_question}, action narration = {narration}")
         hoi_feature_dict['conversations'] = [{"from": "human", "value": selected_question},
