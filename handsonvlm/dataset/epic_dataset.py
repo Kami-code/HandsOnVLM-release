@@ -149,6 +149,10 @@ class EpicReasoningConversationDataset(EpicConversationDataset):
             hoi_feature_dict = self.epic_hoi_dataset.load_hoi_features(action)
             image_abs_paths = hoi_feature_dict['image_abs_paths']
             last_image_path = image_abs_paths[-1]
+            print("self.reasoning_templates = ", self.reasoning_templates)
+
+            print("last_image_path = ", last_image_path)
+            exit()
             if last_image_path in self.reasoning_templates:
                 questions = self.reasoning_templates[last_image_path]
                 if len(questions) != 0:
