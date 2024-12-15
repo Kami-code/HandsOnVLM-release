@@ -239,6 +239,7 @@ class EpicHOIDataset(EpicDataset):
 
         full_names = []
         image_abs_paths = []
+        image_paths = []
         global_feats, global_masks = [], []
         rhand_feats, rhand_masks, rhand_bboxs = [], [], []
         lhand_feats, lhand_masks, lhand_bboxs = [], [], []
@@ -250,6 +251,7 @@ class EpicHOIDataset(EpicDataset):
             full_name = os.path.join(action.participant_id, "rgb_frames", action.video_id, f_name)
             image_abs_path = os.path.join(EPIC_KITCHEN_DATASET_DIR, full_name)
             image_abs_paths.append(image_abs_path)
+            image_paths.append(full_name)
             full_names.append(full_name)
             # f_dict: 'GLOBAL_FEAT',
             # 'HAND_RIGHT_FEAT', 'HAND_RIGHT_BBOX', 'OBJECT_RIGHT_FEAT', 'OBJECT_RIGHT_BBOX',
@@ -368,24 +370,9 @@ class EpicHOIDataset(EpicDataset):
 
         hoi_feature_dict = {"name": full_names, "feat": feats, "bbox_feat": bbox_feats, "valid_mask": valid_masks, 'times': frame_aligned_observation_times,
                             'start_time': action.start_time, 'frames_idxs': observation_frame_idxs,
-                            "image_abs_paths": image_abs_paths}
+                            "image_abs_paths": image_abs_paths, 'image_paths': image_paths}
 
         return hoi_feature_dict
-
-    def load_image_paths(self, action: EpicAction):
-        frame_aligned_observation_times, observation_frame_idxs = self.sampler(action)
-        frames_names = [frame_template.format(i) for i in observation_frame_idxs]
-        start_frame_idx = len(observation_frame_idxs) - observation_frames_num
-        frames_names = frames_names[start_frame_idx:]
-
-        full_names = []
-        image_abs_paths = []
-        for f_name in frames_names:
-            full_name = os.path.join(action.participant_id, "rgb_frames", action.video_id, f_name)
-            image_abs_path = os.path.join(EPIC_KITCHEN_DATASET_DIR, full_name)
-            image_abs_paths.append(image_abs_path)
-            full_names.append(full_name)
-        return full_names, image_abs_paths
 
     def __getitem__(self, idx):
         action: EpicAction = self.actions[idx]
