@@ -45,18 +45,6 @@ class EpicConversationDataset(Dataset):
         self.epic_hoi_dataset: EpicHOIDataset = epic_hoi_dataset
         self.tokenizer = tokenizer
         assert epic_hoi_dataset.use_wrong_narration is False, "The dataset should use correct narration"
-
-        # load rephrase templates
-        reasoning_val_path = "/ocean/projects/cis240031p/cbao/codes/lita/ek100_questions_val.json"
-        self.reasoning_templates = {}
-        with open(reasoning_val_path, "r") as file:
-            rephrase_file = json.load(file)
-            cnt = 0
-            for key, value in rephrase_file.items():
-                questions = extract_questions(value)
-                self.reasoning_templates[key] = questions
-                cnt += 1
-            print(f"loaded reasoning templates, len = {len(self.reasoning_templates)}, total questions = {cnt}")
         self.deterministic = deterministic
 
 
@@ -66,6 +54,7 @@ class EpicConversationDataset(Dataset):
     def __getitem__(self, i):
         if not self.deterministic:
             rng = np.random.RandomState()  # local rng independent of global
+            print("self.len = ", self.__len__())
             i = rng.randint(0, self.__len__())  # random index
         hoi_feature_dict: dict = self.get_sources(i)
         # add <image> to first human
@@ -120,22 +109,8 @@ class EpicConversationDataset(Dataset):
             hand_traj_str += "<hand_traj>"
         narration = hoi_feature_dict["narration"]
         selected_answer = random.choice(general_trajectory_answer_templates).format(hand_traj_str)
-        image_abs_paths = hoi_feature_dict["image_abs_paths"]
-        last_image_path = image_abs_paths[-1]
-
-        if self.epic_hoi_dataset.split == "validation" and last_image_path in self.reasoning_templates and self.epic_hoi_dataset.rephrase_rate == 1:
-            # assert last_image_path in self.reasoning_templates, f"last_image_path = {last_image_path}"
-            questions = self.reasoning_templates[last_image_path]
-            if len(questions) == 0:
-                print("this is strange that the question list are empty: ", last_image_path)
-                selected_question = random.choice(action_question_templates).format(narration)
-            else:
-
-                selected_question = random.choice(questions)
-                print(f"rephrased question = {selected_question}, action narration = {narration}")
-        else:
-            print("using explicit narration!!")
-            selected_question = random.choice(action_question_templates).format(narration)
+        print("using explicit narration!!")
+        selected_question = random.choice(action_question_templates).format(narration)
 
         hoi_feature_dict['conversations'] = [{"from": "human", "value": selected_question},
                                              {"from": "gpt", "value": selected_answer}]
