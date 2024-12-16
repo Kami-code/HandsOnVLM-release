@@ -6,8 +6,9 @@
 [HandsOnVLM: Vision-Language Models for Hand-Object Interaction Prediction](https://www.chenbao.tech/handsonvlm/), 
 
 
-[Chen Bao](https://chenbao.tech), [Jiarui Xu](https://jerryxu.net/), [Xiaolong Wang](https://xiaolonw.github.io/), [Abhinav Gupta](https://www.cs.cmu.edu/~abhinavg/), [Homanga Bharadhwaj](https://homangab.github.io/)
+[Chen Bao](https://chenbao.tech), [Jiarui Xu](https://jerryxu.net/), [Xiaolong Wang](https://xiaolonw.github.io/)†, [Abhinav Gupta](https://www.cs.cmu.edu/~abhinavg/)†, [Homanga Bharadhwaj](https://homangab.github.io/)†
 
+† Equal Advising
 
 HandsOnVLM is a novel vision-language model for hand-object interction prediction.
 This repo contains the training and inference code for HandsOnVLM.
