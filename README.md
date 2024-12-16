@@ -82,7 +82,7 @@ python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm-1
 
 ## CLI Inference
 
-Comming soon.
+Coming soon.
 
 
 ## Bibtex
