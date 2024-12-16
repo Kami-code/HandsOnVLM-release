@@ -41,6 +41,13 @@ The file structure is listed as follows:
 
 See [Preparing Datasets for HandsOnVLM](docs/prepare_data.md).
 
+## Weights
+
+| Model Name     |                           LLM version                           |                         Weights                         |
+|----------------|:---------------------------------------------------------------:|:-------------------------------------------------------:|
+| HandsOnVLM-7B  |  [Vicuna-7B-v1.3](https://huggingface.co/lmsys/vicuna-7b-v1.3)  | [Link](https://huggingface.co/Kami-code/handsonvlm-7b)  |
+| HandsOnVLM-13B | [Vicuna-13B-v1.3](https://huggingface.co/lmsys/vicuna-13b-v1.3) | [Link](https://huggingface.co/Kami-code/handsonvlm-13b) |
+
 ## Train
 
 The HandsOnVLM model only uses one stage supervised fine-tuning. The linear projection is initialized by the LLaVA pretrained weights. The training uses 8 H100 GPUs with 80GB memory.
@@ -57,7 +64,7 @@ Similarly for 7B checkpoints. Replace `13b` with `7b` in the above commands.
 
 ### Supervised Fine-tuning
 
-The HandsOnVLM model can be trained using the supervised fine-tuning script [here](scripts/finetune.sh). First update LITA dataset directory in data_path (`--data_path`) and checkpoint directory (`./checkpoints`).
+The HandsOnVLM model can be trained using the supervised fine-tuning script [here](scripts/finetune.sh). To co-train with LITA's task, also update LITA dataset directory in data_path (`--data_path`) and checkpoint directory (`./checkpoints`).
 ```Shell
 sh scripts/finetune.sh
 ```
