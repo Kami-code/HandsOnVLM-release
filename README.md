@@ -1,6 +1,6 @@
 # HandsOnVLM: Vision-Language Models for Hand-Object Interaction Prediction
 
-[[Project Page]](https://www.chenbao.tech/handsonvlm/) [[arXiv]](https://arxiv.org/abs/2305.05706) [[Paper]](https://www.chenbao.tech/dexart/static/paper/dexart.pdf)
+[[Project Page]](https://www.chenbao.tech/handsonvlm/) [[arXiv]]() [[Paper]]()
 -----
 
 [HandsOnVLM: Vision-Language Models for Hand-Object Interaction Prediction](https://www.chenbao.tech/handsonvlm/), 
@@ -65,11 +65,12 @@ sh scripts/finetune.sh
 
 ## Evaluation
 
-We provide the evaluation pipeline for the EPIC-KITCHEN-100 dataset.
+We provide the evaluation pipeline for the Reasoning-based EPIC-KITCHEN-100 dataset.
 
-1. Generate LITA responses and evaluate temporal localization metrics (mIOU and P@0.5)
 ```Shell
-PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm  --test-ek-version ek100
+python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm-7b
+python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm-13b
+
 ```
 
 
