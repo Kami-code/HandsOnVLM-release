@@ -88,6 +88,8 @@ Coming soon.
 
 ## Bibtex
 
+If the contents of thie repository are helpful, please consider citing our paper 
+
 ```
 @inproceedings{
 }
@@ -95,4 +97,4 @@ Coming soon.
 
 ## Acknowledgements
 
-This repository employs the same code structure to that used in [LITA](https://github.com/NVlabs/LITA) and [hoi-forecast](https://github.com/stevenlsw/hoi-forecast).
+This repository builds upon code from [LITA](https://github.com/NVlabs/LITA) and [hoi-forecast](https://github.com/stevenlsw/hoi-forecast). We thank the authors of these papers for open-sourcing their code.
