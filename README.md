@@ -13,6 +13,8 @@
 HandsOnVLM is a novel vision-language model for hand-object interction prediction.
 This repo contains the training and inference code for HandsOnVLM.
 
+![HandsOnVLM Teaser](docs/teaser.gif)
+
 ## Installation
 
 1. Clone the repo and Create a conda env with all the Python dependencies.
