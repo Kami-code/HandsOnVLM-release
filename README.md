@@ -1,6 +1,6 @@
 # HandsOnVLM: Vision-Language Models for Hand-Object Interaction Prediction
 
-[[Project Page]](https://www.chenbao.tech/handsonvlm/) [[arXiv]]() [[Paper]]()
+[[Project Page]](https://www.chenbao.tech/handsonvlm/) [[arXiv]](https://arxiv.org/abs/2412.13187) [[Paper]](https://arxiv.org/pdf/2412.13187)
 -----
 
 [HandsOnVLM: Vision-Language Models for Hand-Object Interaction Prediction](https://www.chenbao.tech/handsonvlm/), 
@@ -91,7 +91,13 @@ Coming soon.
 If the contents of thie repository are helpful, please consider citing our paper 
 
 ```
-@inproceedings{
+@misc{bao2024handsonvlmvisionlanguagemodelshandobject,
+      title={HandsOnVLM: Vision-Language Models for Hand-Object Interaction Prediction}, 
+      author={Chen Bao and Jiarui Xu and Xiaolong Wang and Abhinav Gupta and Homanga Bharadhwaj},
+      year={2024},
+      eprint={2412.13187},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
 }
 ```
 

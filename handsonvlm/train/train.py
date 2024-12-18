@@ -19,10 +19,6 @@ from handsonvlm.dataset.hybrid_dataset import HybridDataset, DataCollatorForSupe
 from handsonvlm.arguments import ModelArguments, DataArguments, TrainingArguments
 
 local_rank = None
-os.environ["WANDB_PROJECT"] = "liha_hoi_final_full"
-
-
-# os.environ['WANDB_MODE'] = "offline"
 
 
 def rank0_print(*args):
