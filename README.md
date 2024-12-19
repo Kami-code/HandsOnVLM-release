@@ -63,7 +63,7 @@ git clone https://huggingface.co/liuhaotian/llava-pretrain-vicuna-13b-v1.3
 mv vicuna-13b-v1.3 vicuna-v1-3-13b
 mv llava-pretrain-vicuna-13b-v1.3 llava-vicuna-v1-3-13b-pretrain
 ```
-Similarly for 7B checkpoints. Replace `13b` with `7b` in the above commands.
+Similarly for the 7B checkpoints, replace `13b` with `7b` in the above commands.
 
 ### Supervised Fine-tuning
 
