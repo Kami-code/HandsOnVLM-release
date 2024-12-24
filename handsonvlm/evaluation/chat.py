@@ -11,8 +11,8 @@ if __name__ == "__main__":
     parser.add_argument("--conv-mode", type=str, default=None)
     parser.add_argument("--load-8bit", action="store_true")
     parser.add_argument("--load-4bit", action="store_true")
-    parser.add_argument("--use_reason", action="store_true")
-    parser.add_argument("--mode", type=str, default="general")
+    parser.add_argument("--visual-path", type=str, required=True)
+    parser.add_argument("--output-video-path", type=str, default='./output.mp4')
     args = parser.parse_args()
 
     handsonvlm_inference = HandsOnVLMInference(model_path=args.model_path,
@@ -20,7 +20,5 @@ if __name__ == "__main__":
                                                load_8bit=args.load_8bit,
                                                load_4bit=args.load_4bit,
                                                conv_mode=args.conv_mode)
-
-    traj_info = handsonvlm_inference.evaluate_epic_kitchen_traj(test_version='ek100',
-                                                                split='validation',
-                                                                use_reason=args.use_reason)
+    while True:
+        handsonvlm_inference.user_input_inference(path=args.visual_path, output_video_path=args.output_video_path)

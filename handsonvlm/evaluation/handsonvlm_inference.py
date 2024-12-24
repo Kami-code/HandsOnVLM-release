@@ -4,12 +4,14 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
+from handsonvlm.evaluation.utils import create_trajectory_video
+from handsonvlm.handsonvlm_utils import load_video_frames, load_video
 from handsonvlm.model.builder import load_pretrained_model
-from hoi_forecast.dataset.dataset import get_epic_hoi_dataset_by_name
-from hoi_forecast.dataset.epic_structures import EpicHOIDataset
-
 from handsonvlm.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN
 from handsonvlm.dataset.epic_dataset import EpicConversationDataset, EpicReasoningConversationDataset
+
+from hoi_forecast.dataset.dataset import get_epic_hoi_dataset_by_name
+from hoi_forecast.dataset.epic_structures import EpicHOIDataset
 from hoi_forecast.evaluation.traj_eval import evaluate_traj_stochastic
 
 from llava.utils import disable_torch_init
@@ -172,4 +174,59 @@ class HandsOnVLMInference:
             evaluate_traj(val_info)
         return val_info
 
+    def wait_for_user_input(self):
+        while True:
+            try:
+                user_input = input(f"{self.roles[0]}: ")
+                user_input = user_input
+            except EOFError:
+                user_input = ""
+            if not user_input:
+                print("exit...")
+                return None
+            return user_input
+
+    def user_input_inference(self, path, output_video_path):
+        self.init_conversation()
+        user_input = self.wait_for_user_input()
+
+        query_video_path = []
+
+        sample = {}
+        if path.endswith("png") or path.endswith("jpg"):
+            # single image inference
+            for i in range(10):
+                query_video_path.append(path)
+            image = load_video_frames(visual_path=query_video_path,
+                                      processor=self.image_processor,
+                                      image_aspect_ratio='square')
+        elif path.endswith("mp4"):
+            # video branch
+            image = load_video(path, self.image_processor, num_frames=10)
+        assert image.shape == torch.Size([10, 3, 224, 224]), image.shape
+        image = image.unsqueeze(0).repeat(10, 1, 1, 1, 1).reshape(100, 3, 224, 224).unsqueeze(0).half().cuda()
+        assert image.shape == torch.Size([1, 100, 3, 224, 224]), image.shape
+
+        sample['image'] = image.cuda()
+
+        prompt = DEFAULT_IMAGE_TOKEN + '\n' + user_input
+        # first message
+        self.conv.append_message(self.conv.roles[0], prompt)
+        self.conv.append_message(self.conv.roles[1], None)
+
+        while True:
+            print("current_conv:", self.conv.messages)
+            prompt = self.conv.get_prompt()
+            sample['input_ids'] = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
+            pred_hand_trajectory, _, pred_hand_valid, text = self.inference(sample)
+            print("response: ", text)
+            if pred_hand_valid:
+                create_trajectory_video(
+                    query_video_path,
+                    pred_hand_trajectory,
+                    output_video_path,
+                )
+                break
+            user_input = self.wait_for_user_input()
+            self.conv.append_message(self.conv.roles[0], user_input)
 

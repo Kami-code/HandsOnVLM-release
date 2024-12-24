@@ -79,14 +79,15 @@ We provide the evaluation pipeline for the Reasoning-based EPIC-KITCHEN-100 data
 
 ```Shell
 python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm-7b
-python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm-13b
-
+python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm-7b --use_reason
 ```
 
 ## CLI Inference
 
-Coming soon.
-
+We provide a script for chat with HandsOnVLM with images or videos.
+```Shell
+python -m handsonvlm.evaluation.chat --model-path ./checkpoints/handsonvlm-7b --visual_path ./epic_kitchen.jpg
+```
 
 ## Bibtex
 
