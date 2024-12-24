@@ -86,7 +86,7 @@ python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm-7
 
 We provide a script for chat with HandsOnVLM with images or videos.
 ```Shell
-python -m handsonvlm.evaluation.chat --model-path ./checkpoints/handsonvlm-7b --visual_path ./epic_kitchen.jpg
+python -m handsonvlm.evaluation.chat --model-path ./checkpoints/handsonvlm-7b --visual-path ./epic_kitchen.jpg
 ```
 
 ## Bibtex

@@ -109,12 +109,11 @@ class HandsOnVLMInference:
                 return_dict_in_generate=True)
             output_ids = outputs.sequences
             text = self.tokenizer.decode(output_ids[0, input_ids.shape[1]:]).strip()
-            # todo: try to support multi-turn conversation, wait to debug
             self.conv.append_message(self.conv.roles[1], text)
             pred_hand = outputs.pred_hands
             if pred_hand is None:
                 pred_hand = torch.zeros(1, 1, 2, 4, 2).cuda().half()
-                return pred_hand, False
+                return pred_hand, False, text
             total_hand_tokens_number = pred_hand.shape[2]
             pred_hands = pred_hand.unsqueeze(0)
             assert pred_hands.shape == torch.Size([1, 1, 2, total_hand_tokens_number, 2]), pred_hands.shape
@@ -122,7 +121,7 @@ class HandsOnVLMInference:
                 pred_hands = pred_hands[:, :, :, -4:, :]
             elif total_hand_tokens_number < 4:
                 pred_hands = torch.cat([pred_hands, torch.zeros(1, 1, 2, 4 - total_hand_tokens_number, 2).cuda().half()], dim=3)
-        return pred_hands, True
+        return pred_hands, True, text
 
 
     def evaluate_epic_kitchen_traj(self, test_version, split, use_reason=True):
@@ -178,7 +177,6 @@ class HandsOnVLMInference:
         while True:
             try:
                 user_input = input(f"{self.roles[0]}: ")
-                user_input = user_input
             except EOFError:
                 user_input = ""
             if not user_input:
@@ -215,10 +213,9 @@ class HandsOnVLMInference:
         self.conv.append_message(self.conv.roles[1], None)
 
         while True:
-            print("current_conv:", self.conv.messages)
             prompt = self.conv.get_prompt()
             sample['input_ids'] = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
-            pred_hand_trajectory, _, pred_hand_valid, text = self.inference(sample)
+            pred_hand_trajectory, pred_hand_valid, text = self.inference(sample)
             print("response: ", text)
             if pred_hand_valid:
                 create_trajectory_video(
