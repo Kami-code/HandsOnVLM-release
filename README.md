@@ -86,8 +86,14 @@ python -m handsonvlm.evaluation.evaluate --model-path ./checkpoints/handsonvlm-7
 
 We provide a script for chat with HandsOnVLM with images or videos.
 ```Shell
-python -m handsonvlm.evaluation.chat --model-path ./checkpoints/handsonvlm-7b --visual-path ./epic_kitchen.jpg
+python -m handsonvlm.evaluation.chat --model-path ./checkpoints/handsonvlm-7b --visual-path <path-to-HandsOnVLM-release>/docs/epic_kitchen.jpg
+Human: Where should my hand move to if I want to reach the oven?
 ```
+
+The response could be: 
+`Agent: response:  Certainly! The hand trajectory for reach the oven is as follows: <hand_traj> <hand_traj> <hand_traj> <hand_traj>  .</s>`
+
+<img src="docs/output.gif" width="50%" height="50%"/>
 
 ## Bibtex
 
