@@ -97,7 +97,7 @@ The response could be:
 
 ## Bibtex
 
-If the contents of thie repository are helpful, please consider citing our paper 
+If the contents of this repository are helpful, please consider citing our paper 
 
 ```
 @misc{bao2024handsonvlmvisionlanguagemodelshandobject,
