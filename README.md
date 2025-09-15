@@ -100,13 +100,15 @@ The response could be:
 If the contents of this repository are helpful, please consider citing our paper 
 
 ```
-@misc{bao2024handsonvlmvisionlanguagemodelshandobject,
-      title={HandsOnVLM: Vision-Language Models for Hand-Object Interaction Prediction}, 
-      author={Chen Bao and Jiarui Xu and Xiaolong Wang and Abhinav Gupta and Homanga Bharadhwaj},
-      year={2024},
-      eprint={2412.13187},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
+@article{
+bao2025handsonvlm,
+title={HandsOn{VLM}: Vision-Language Models for Hand-Object Interaction Prediction},
+author={Chen Bao and Jiarui Xu and Xiaolong Wang and Abhinav Gupta and Homanga Bharadhwaj},
+journal={Transactions on Machine Learning Research},
+issn={2835-8856},
+year={2025},
+url={https://openreview.net/forum?id=ehhMFjKnWm},
+note={}
 }
 ```
 
